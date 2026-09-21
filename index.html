@@ -1,0 +1,787 @@
+<title>Mookh Login Helper</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #1f6feb;
+    --green: #3fb950;
+    --green-bg: #0d2c17;
+    --green-border: #1a7f37;
+    --orange: #d29922;
+    --orange-bg: #2c1f0a;
+    --red: #f85149;
+    --red-bg: #2c0f0e;
+    --code-bg: #0d1117;
+    --step-inactive: #30363d;
+    --step-active: #1f6feb;
+    --step-done: #1a7f37;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0 16px;
+    padding-block: 24px;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .header {
+    text-align: center;
+    padding-block: 0 28px;
+  }
+
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #1f6feb, #58a6ff);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -1px;
+  }
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .header p {
+    color: var(--text2);
+    font-size: 13px;
+  }
+
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+    padding: 0 4px;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    position: relative;
+  }
+
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 28px;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: var(--border);
+    transform: translateY(-50%);
+    transition: background 0.3s;
+  }
+
+  .step.done:not(:last-child)::after { background: var(--step-done); }
+
+  .step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--step-inactive);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    background: var(--bg);
+    flex-shrink: 0;
+    z-index: 1;
+    transition: all 0.3s;
+  }
+
+  .step.active .step-circle {
+    border-color: var(--step-active);
+    color: var(--accent);
+    background: rgba(31, 111, 235, 0.1);
+  }
+
+  .step.done .step-circle {
+    border-color: var(--step-done);
+    background: var(--step-done);
+    color: #fff;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: opacity 0.3s;
+    margin-bottom: 16px;
+  }
+
+  .card.hidden { display: none; }
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-desc {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    letter-spacing: 0.02em;
+  }
+
+  input[type="email"],
+  input[type="text"],
+  input[type="tel"] {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--text2); opacity: 0.5; }
+
+  .otp-input {
+    font-size: 22px;
+    letter-spacing: 8px;
+    text-align: center;
+    padding: 14px;
+  }
+
+  button {
+    background: var(--accent2);
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s, opacity 0.2s;
+    font-family: inherit;
+    margin-top: 14px;
+  }
+
+  button:hover { background: var(--accent); }
+  button:active { opacity: 0.8; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  button.secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  button.secondary:hover { background: var(--border); }
+
+  .msg {
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .msg.show { display: block; }
+  .msg.error { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+  .msg.success { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  .msg.info { background: rgba(88, 166, 255, 0.08); border: 1px solid rgba(88, 166, 255, 0.25); color: var(--accent); }
+
+  /* Success panel */
+  .success-panel {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .success-icon { font-size: 40px; margin-bottom: 12px; display: block; }
+
+  .success-panel h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .success-panel p {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .btn-row { display: flex; gap: 10px; flex-direction: column; }
+
+  .btn-open {
+    background: #1a7f37;
+    font-size: 15px;
+    padding: 14px;
+    margin-top: 0;
+  }
+  .btn-open:hover { background: var(--green); color: #000; }
+
+  .copy-status {
+    font-size: 12px;
+    color: var(--green);
+    margin-top: 8px;
+    text-align: center;
+    min-height: 18px;
+  }
+
+  /* Instructions panel */
+  .instructions {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .instructions h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .step-row:last-child { margin-bottom: 0; }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-row p { font-size: 13px; color: var(--text2); }
+  .step-row p strong { color: var(--text); font-weight: 500; }
+  .step-row p code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  /* Bookmarklet */
+  .bookmarklet-wrap {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .bookmarklet-wrap p {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .bookmarklet-link {
+    display: block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+    cursor: grab;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bookmarklet-link:hover { border-color: var(--accent); }
+
+  /* Mobile address-bar instruction */
+  .address-bar-demo {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    margin: 10px 0;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .address-bar-demo span { color: var(--text2); flex-shrink: 0; }
+
+  .platform-note {
+    background: rgba(210,153,34,0.08);
+    border: 1px solid rgba(210,153,34,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--orange);
+    margin-top: 10px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  .resend-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    width: auto;
+    margin-top: 8px;
+    display: inline-block;
+  }
+  .resend-btn:hover { color: #fff; background: none; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.25);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+    margin-left: 6px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f6f8fa; --surface: #fff; --surface2: #f6f8fa;
+      --border: #d0d7de; --text: #1f2328; --text2: #57606a; --code-bg: #f6f8fa;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f8fa; --surface: #fff; --surface2: #f6f8fa;
+    --border: #d0d7de; --text: #1f2328; --text2: #57606a; --code-bg: #f6f8fa;
+  }
+</style>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">M</div>
+      <span class="logo-text">mookh</span>
+    </div>
+    <p>Login helper — access your tickets on any device</p>
+  </div>
+
+  <div class="steps">
+    <div class="step active" id="si1"><div class="step-circle" id="sc1">1</div></div>
+    <div class="step" id="si2"><div class="step-circle" id="sc2">2</div></div>
+    <div class="step" id="si3"><div class="step-circle" id="sc3">3</div></div>
+  </div>
+
+  <!-- Card 1: Email -->
+  <div class="card" id="card1">
+    <div class="card-title">Enter your email</div>
+    <div class="card-desc">We'll send a one-time code to log you in.</div>
+    <div class="field">
+      <label for="emailInput">Email address</label>
+      <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="msg" id="msg1"></div>
+    <button id="sendBtn" onclick="sendOTP()">Send login code</button>
+  </div>
+
+  <!-- Card 2: OTP -->
+  <div class="card hidden" id="card2">
+    <div class="card-title">Enter the code <span class="chip">📧 Check your email</span></div>
+    <div class="card-desc">6-digit code sent to <strong id="emailDisplay"></strong></div>
+    <div class="field">
+      <label for="otpInput">Login code</label>
+      <input type="tel" id="otpInput" class="otp-input" placeholder="000000"
+        maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+    </div>
+    <div class="msg" id="msg2"></div>
+    <button id="verifyBtn" onclick="verifyOTP()">Verify and log in</button>
+    <button class="secondary" onclick="backToEmail()">← Change email</button>
+    <div style="text-align:center">
+      <button class="resend-btn" id="resendBtn" onclick="resendOTP()">Resend code</button>
+    </div>
+  </div>
+
+  <!-- Card 3: Success -->
+  <div class="hidden" id="card3">
+    <div class="success-panel">
+      <span class="success-icon">✓</span>
+      <h2>Logged in!</h2>
+      <p id="successEmail"></p>
+
+      <div class="btn-row">
+        <button class="btn-open" id="mainActionBtn" onclick="mainAction()">Loading…</button>
+        <button class="secondary" onclick="copyOnly()">📋 Copy script only</button>
+      </div>
+
+      <div class="copy-status" id="copyStatus"></div>
+    </div>
+
+    <!-- Desktop instructions -->
+    <div class="instructions" id="desktopInstr">
+      <h3>🖥 Desktop — Console paste</h3>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <p>Click <strong>Open My Tickets →</strong> — script is auto-copied</p>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <p>When mookh.com opens press <code>F12</code> → click <strong>Console</strong></p>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <p>Paste with <code>Ctrl+V</code> / <code>⌘V</code> → press <code>Enter</code></p>
+      </div>
+      <div class="bookmarklet-wrap">
+        <p>Save as bookmarklet for one-click login next time:</p>
+        <a class="bookmarklet-link" id="bookmarkletLink" title="Drag this to your bookmarks bar">🔖 Drag me to bookmarks bar</a>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px;text-align:center">While on mookh.com, click this bookmark to instantly restore your session</div>
+      </div>
+    </div>
+
+    <!-- Mobile instructions -->
+    <div class="instructions hidden" id="mobileInstr">
+      <h3>📱 Mobile — Address bar paste</h3>
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <p>Tap <strong>Open My Tickets →</strong> — login link is auto-copied</p>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <p>When mookh.com opens, <strong>tap the address bar</strong></p>
+      </div>
+      <div class="step-row">
+        <div class="step-num">3</div>
+        <p><strong>Select all text</strong> in the address bar, then <strong>paste</strong></p>
+      </div>
+      <div class="address-bar-demo">
+        <span>🔗</span> javascript:(function(){var r=JSON…
+      </div>
+      <div class="step-row">
+        <div class="step-num">4</div>
+        <p>Tap <strong>Go</strong> — My Tickets loads automatically</p>
+      </div>
+      <div id="androidNote" class="platform-note hidden">
+        ⚠️ Android Chrome blocks javascript: URLs. Use <strong>Firefox</strong> on Android instead — it supports this method.
+      </div>
+      <div class="bookmarklet-wrap">
+        <p>Or add as a bookmark now and tap it while on mookh.com:</p>
+        <a class="bookmarklet-link" id="bookmarkletLinkMobile" title="Tap to copy, then add as bookmark">🔖 Tap to copy login link</a>
+        <div style="font-size:11px;color:var(--text2);margin-top:6px;text-align:center">Tap → Copy link → Add bookmark manually in your browser</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'https://new-api.mookh.com';
+  let currentEmail = '';
+  let sessionData = null;
+
+  // Detect mobile and browser
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  const isAndroidChrome = /Android/i.test(navigator.userAgent) && /Chrome/i.test(navigator.userAgent) && !/Firefox/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  function setMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'msg ' + (text ? type + ' show' : '');
+  }
+
+  function setStep(step) {
+    [1,2,3].forEach(i => {
+      const si = document.getElementById('si' + i);
+      const sc = document.getElementById('sc' + i);
+      si.className = 'step' + (i < step ? ' done' : i === step ? ' active' : '');
+      sc.textContent = i < step ? '✓' : i;
+    });
+  }
+
+  async function sendOTP() {
+    const email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@')) {
+      setMsg('msg1', 'Please enter a valid email address.', 'error');
+      return;
+    }
+    const btn = document.getElementById('sendBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Sending…';
+    setMsg('msg1', '', '');
+    try {
+      const res = await fetch(`${API}/api/auth/otp/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: email })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || data.error || `Error ${res.status}`);
+      currentEmail = email;
+      document.getElementById('emailDisplay').textContent = email;
+      document.getElementById('card1').classList.add('hidden');
+      document.getElementById('card2').classList.remove('hidden');
+      document.getElementById('otpInput').value = '';
+      document.getElementById('otpInput').focus();
+      setStep(2);
+      setMsg('msg2', 'Code sent! Check your inbox (and spam folder).', 'success');
+    } catch (err) {
+      setMsg('msg1', err.message || 'Failed to send code. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send login code';
+    }
+  }
+
+  async function verifyOTP() {
+    const code = document.getElementById('otpInput').value.trim().replace(/\D/g, '');
+    if (code.length !== 6) { setMsg('msg2', 'Please enter the 6-digit code.', 'error'); return; }
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Verifying…';
+    setMsg('msg2', '', '');
+    try {
+      const res = await fetch(`${API}/api/auth/otp/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: currentEmail, code })
+      });
+      const data = await res.json();
+      if (!res.ok || (!data.access_token && !data.token)) {
+        throw new Error(data.message || data.error || 'Invalid or expired code.');
+      }
+      sessionData = data;
+      showSuccess();
+    } catch (err) {
+      setMsg('msg2', err.message || 'Verification failed. Try again.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Verify and log in';
+    }
+  }
+
+  function buildScript() {
+    const jwt = sessionData.access_token || sessionData.token;
+    const rt = sessionData.refresh_token || sessionData.refreshToken || '';
+    const user = sessionData.user || { email: currentEmail, roles: ['user'] };
+    const authObj = { token: jwt, accessToken: jwt, access_token: jwt, refreshToken: rt, refresh_token: rt, user, isAuthenticated: true, isLoggedIn: true };
+    return `(function(){var r=JSON.parse(localStorage.getItem('persist:root')||'{}');r.auth=JSON.stringify(${JSON.stringify(authObj)});localStorage.setItem('persist:root',JSON.stringify(r));location.href='/my-tickets';})()`;
+  }
+
+  function buildJsUrl() {
+    return 'javascript:' + buildScript();
+  }
+
+  function showSuccess() {
+    document.getElementById('card2').classList.add('hidden');
+    document.getElementById('card3').classList.remove('hidden');
+    document.getElementById('successEmail').textContent = 'Signed in as ' + currentEmail;
+    setStep(3);
+
+    // Set up correct UI based on device
+    if (isMobile) {
+      document.getElementById('mainActionBtn').textContent = 'Open My Tickets →';
+      document.getElementById('mobileInstr').classList.remove('hidden');
+      document.getElementById('desktopInstr').classList.add('hidden');
+      if (isAndroidChrome) {
+        document.getElementById('androidNote').classList.remove('hidden');
+      }
+      // Bookmarklet for mobile — tap to copy
+      const bml = document.getElementById('bookmarkletLinkMobile');
+      bml.href = buildJsUrl();
+      bml.onclick = function(e) {
+        e.preventDefault();
+        copyToClipboard(buildJsUrl());
+        document.getElementById('copyStatus').textContent = '✓ Login link copied — add it as a bookmark!';
+        setTimeout(() => document.getElementById('copyStatus').textContent = '', 4000);
+      };
+    } else {
+      document.getElementById('mainActionBtn').textContent = 'Open My Tickets →';
+      document.getElementById('desktopInstr').classList.remove('hidden');
+      document.getElementById('mobileInstr').classList.add('hidden');
+      const bml = document.getElementById('bookmarkletLink');
+      bml.href = buildJsUrl();
+    }
+  }
+
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { document.execCommand('copy'); } catch {}
+      document.body.removeChild(ta);
+      return true;
+    }
+  }
+
+  async function mainAction() {
+    // On mobile: copy javascript: URL. On desktop: copy bare script.
+    const textToCopy = isMobile ? buildJsUrl() : buildScript();
+    await copyToClipboard(textToCopy);
+    const msg = isMobile
+      ? '✓ Login link copied — paste in address bar after mookh.com opens!'
+      : '✓ Script copied — paste in DevTools console!';
+    document.getElementById('copyStatus').textContent = msg;
+    setTimeout(() => document.getElementById('copyStatus').textContent = '', 5000);
+    window.open('https://mookh.com', '_blank');
+  }
+
+  async function copyOnly() {
+    const textToCopy = isMobile ? buildJsUrl() : buildScript();
+    await copyToClipboard(textToCopy);
+    document.getElementById('copyStatus').textContent = isMobile ? '✓ Login link copied!' : '✓ Script copied!';
+    setTimeout(() => document.getElementById('copyStatus').textContent = '', 3000);
+  }
+
+  function backToEmail() {
+    document.getElementById('card2').classList.add('hidden');
+    document.getElementById('card1').classList.remove('hidden');
+    setStep(1);
+    setMsg('msg1', '', '');
+    setMsg('msg2', '', '');
+  }
+
+  async function resendOTP() {
+    const btn = document.getElementById('resendBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    setMsg('msg2', '', '');
+    try {
+      const res = await fetch(`${API}/api/auth/otp/request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: currentEmail })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed');
+      setMsg('msg2', 'New code sent!', 'success');
+    } catch (err) {
+      setMsg('msg2', err.message || 'Could not resend.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Resend code';
+    }
+  }
+
+  // Auto-submit when 6 digits entered
+  document.getElementById('otpInput').addEventListener('input', function() {
+    const val = this.value.replace(/\D/g, '');
+    this.value = val;
+    if (val.length === 6) setTimeout(verifyOTP, 300);
+  });
+
+  document.getElementById('emailInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendOTP();
+  });
+</script>

@@ -410,6 +410,104 @@
     margin-top: 10px;
   }
 
+  /* Global hidden utility */
+  .hidden { display: none !important; }
+
+  /* Post-click overlay */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .overlay-box {
+    background: var(--surface);
+    border: 1px solid var(--green-border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .overlay-box h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .overlay-box p {
+    color: var(--text2);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .overlay-steps {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .overlay-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .overlay-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent2);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .overlay-step p {
+    font-size: 13px;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .overlay-step code {
+    background: var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+
+  .overlay-dismiss {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 13px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-family: inherit;
+  }
+
+  .overlay-dismiss:hover { color: var(--text); border-color: var(--text2); }
+
   @keyframes spin { to { transform: rotate(360deg); } }
   .spinner {
     display: inline-block;
@@ -462,6 +560,18 @@
     --border: #d0d7de; --text: #1f2328; --text2: #57606a; --code-bg: #f6f8fa;
   }
 </style>
+
+<!-- Post-click overlay -->
+<div class="overlay hidden" id="overlay">
+  <div class="overlay-box">
+    <h2 id="overlayTitle">Almost there!</h2>
+    <p id="overlayDesc">mookh.com just opened in a new tab</p>
+    <div class="overlay-steps" id="overlaySteps">
+      <!-- filled by JS -->
+    </div>
+    <button class="overlay-dismiss" onclick="document.getElementById('overlay').classList.add('hidden')">Got it — dismiss</button>
+  </div>
+</div>
 
 <div class="container">
   <div class="header">
@@ -726,15 +836,34 @@
   }
 
   async function mainAction() {
-    // On mobile: copy javascript: URL. On desktop: copy bare script.
     const textToCopy = isMobile ? buildJsUrl() : buildScript();
     await copyToClipboard(textToCopy);
-    const msg = isMobile
-      ? '✓ Login link copied — paste in address bar after mookh.com opens!'
-      : '✓ Script copied — paste in DevTools console!';
-    document.getElementById('copyStatus').textContent = msg;
-    setTimeout(() => document.getElementById('copyStatus').textContent = '', 5000);
     window.open('https://mookh.com', '_blank');
+    showOverlay();
+  }
+
+  function showOverlay() {
+    const stepsEl = document.getElementById('overlaySteps');
+    if (isMobile) {
+      document.getElementById('overlayTitle').textContent = 'One more step!';
+      document.getElementById('overlayDesc').textContent = 'mookh.com just opened. Switch to that tab and:';
+      stepsEl.innerHTML = `
+        <div class="overlay-step"><div class="overlay-step-num">1</div><p>Tap the <strong>address bar</strong> at the top</p></div>
+        <div class="overlay-step"><div class="overlay-step-num">2</div><p><strong>Select all</strong> the text in it, then <strong>paste</strong></p></div>
+        <div class="overlay-step"><div class="overlay-step-num">3</div><p>Tap <strong>Go</strong> — My Tickets loads ✓</p></div>
+        ${isAndroidChrome ? '<div style="background:var(--orange-bg);border:1px solid var(--orange);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--orange)">⚠️ Android Chrome blocks this — switch to <strong>Firefox</strong> for Android</div>' : ''}
+      `;
+    } else {
+      document.getElementById('overlayTitle').textContent = 'One more step!';
+      document.getElementById('overlayDesc').textContent = 'mookh.com just opened. Switch to that tab and:';
+      stepsEl.innerHTML = `
+        <div class="overlay-step"><div class="overlay-step-num">1</div><p>Press <code>F12</code> to open DevTools</p></div>
+        <div class="overlay-step"><div class="overlay-step-num">2</div><p>Click the <strong>Console</strong> tab</p></div>
+        <div class="overlay-step"><div class="overlay-step-num">3</div><p>Press <code>Ctrl+V</code> to paste, then <code>Enter</code></p></div>
+        <div class="overlay-step"><div class="overlay-step-num">4</div><p><strong>My Tickets loads automatically ✓</strong></p></div>
+      `;
+    }
+    document.getElementById('overlay').classList.remove('hidden');
   }
 
   async function copyOnly() {
